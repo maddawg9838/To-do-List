@@ -1,4 +1,42 @@
 import json
+import datetime
+
+
+# Display of time and day
+def display():
+    current_time = datetime.datetime.now()
+    month_num = current_time.month
+    hour_num = current_time.hour
+
+    # Using a list for month name assignment
+    months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ]
+
+    # Retrieve month name using month number
+    month = months[month_num - 1]
+
+    # Using a list for personalized message
+    messages = [
+        'Good Morning', 'Good Afternoon', 'Good Evening',
+        'Late Night', 'Early Morning'
+    ]
+
+    # Retrieve message using day number
+    if 3 <= hour_num < 6:
+        message = messages[4]
+    elif 6 <= hour_num < 12:
+        message = messages[0]
+    elif 12 <= hour_num < 18:
+        message = messages[1]
+    elif 18 <= hour_num < 22:
+        message = messages[2]
+    else:
+        message = messages[3]
+
+    # Print formatted date
+    print(f"{message}! Today is {month} {current_time.day}, {current_time.year}")
 
 
 # Load the tasks from a file
@@ -71,6 +109,7 @@ def remove_task(tasks):
 # Main function
 def main():
     tasks = load_tasks()
+    display()
 
     while True:
         display_menu()
