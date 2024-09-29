@@ -1,49 +1,56 @@
 import json
 import datetime
+from dataclasses import dataclass
 
+# Using a list for month name assignment
+MONTHS = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+]
+
+# Using a list for personalized message
+MESSAGES = [
+    'Good Morning', 'Good Afternoon', 'Good Evening',
+    'Late Night', 'Early Morning', 'Welcome Back'
+]
+
+# Using a dataclass for the tasks
+@dataclass
+class Task:
+    task: str
+    complete: bool = False
 
 # Display of time and day
 def display():
     current_time = datetime.datetime.now()
-    month_num = current_time.month
+    month = MONTHS[current_time.month - 1]
     hour_num = current_time.hour
-
-    # Using a list for month name assignment
-    months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ]
-
-    # Retrieve month name using month number
-    month = months[month_num - 1]
-
-    # Using a list for personalized message
-    messages = [
-        'Good Morning', 'Good Afternoon', 'Good Evening',
-        'Late Night', 'Early Morning'
-    ]
-
-    # Retrieve message using day number
-    if 3 <= hour_num < 6:
-        message = messages[4]
-    elif 6 <= hour_num < 12:
-        message = messages[0]
-    elif 12 <= hour_num < 18:
-        message = messages[1]
-    elif 18 <= hour_num < 22:
-        message = messages[2]
-    else:
-        message = messages[3]
-
+    message = get_time_message(hour_num)
+    
     # Print formatted date
     print(f"{message}! Today is {month} {current_time.day}, {current_time.year}")
 
+def get_time_message(hour_num):
+    # Retrieve message using day number
+    time_ranges = [
+        (3, 6, MESSAGES[4]),   # Early Morning
+        (6, 12, MESSAGES[0]),  # Good Morning
+        (12, 18, MESSAGES[1]), # Good Afternoon
+        (18, 22, MESSAGES[2]), # Good Evening
+        (22, 24, MESSAGES[3],  # Late Night
+        (0, 3, MESSAGES[3]))   # Late Night
+        ]
+    
+    for start, end, message in time_ranges:
+        if start <= hour_num  < end:
+            return message
+        return MESSAGES[5] # Fallback
 
 # Load the tasks from a file
 def load_tasks(filename='tasks.json'):
     try:
         with open(filename, 'r') as file:
-            return json.load(file)
+            return [Task(**task) for task in json.load(file)]
     except FileNotFoundError:
         return []
 
@@ -51,7 +58,7 @@ def load_tasks(filename='tasks.json'):
 # Save the tasks to a file
 def save_tasks(tasks, filename='tasks.json'):
     with open(filename, 'w') as file:
-        json.dump(tasks, file)
+        json.dump([task._dict_ for task in tasks], file)
 
 
 # Display the menu
@@ -67,7 +74,7 @@ def display_menu():
 # Add task
 def add_task(tasks):
     task = input("Enter the new task: ")
-    tasks.append({"task": task, "completed": False})
+    tasks.append(Task(task))
 
 
 # View tasks
@@ -76,35 +83,35 @@ def view_tasks(tasks):
         print("No tasks currently")
     else:
         for index, task in enumerate(tasks, start=1):
-            status = "Completed" if task["completed"] else "Pending"
-            print(f"{index}. {task['task']} - {status}")
+            status = "Completed" if task.completed else "Pending"
+            print(f"{index}. {task.task} - {status}")
 
 
 # Mark task as completed
 def mark_task_completed(tasks):
     view_tasks(tasks)
-    try:
-        task_num = int(input("Enter the number of the task to mark as completed: ")) - 1
-        if 0 <= task_num < len(tasks):
-            tasks[task_num]["completed"] = True
-        else:
-            print("Invalid task number")
-    except ValueError:
-        print("Please enter a valid number")
+    task_num = safe_input("Enter the number of the task to mark as completed: ")
+    if 0 < task_num <= len(taks):
+        tasks[task_num - 1].completed = True
+    else:
+        print("Invalid task number")
 
 
 # Remove a task
 def remove_task(tasks):
     view_tasks(tasks)
-    try:
-        task_num = int(input("Enter the number of the task to remove: ")) - 1
-        if 0 <= task_num < len(tasks):
-            tasks.pop(task_num)
-        else:
-            print("Invalid task number")
-    except ValueError:
-        print("Please enter a valid number")
-
+    task_num = safe_input("Enter the number of the task to remove: ")
+    if 0 < task_num <= len(tasks):
+        tasks.pop(task_num - 1)
+    else:
+        print("Invalid task number")
+        
+def safe_input(prompt, expected_type = int):
+    while True:
+        try:
+            return expected_type(input(prompt))
+        except ValueError:
+            print(f"Please enter a valid {expected_type.__name__}.")
 
 # Main function
 def main():
