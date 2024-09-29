@@ -1,5 +1,7 @@
 import json
 import datetime
+import time
+import threading
 from dataclasses import dataclass
 
 # Using a list for month name assignment
@@ -14,21 +16,23 @@ MESSAGES = [
     'Late Night', 'Early Morning', 'Welcome Back'
 ]
 
+
 # Using a dataclass for the tasks
 @dataclass
 class Task:
     task: str
     complete: bool = False
-
-# Display of time and day
-def display():
-    current_time = datetime.datetime.now()
-    month = MONTHS[current_time.month - 1]
-    hour_num = current_time.hour
-    message = get_time_message(hour_num)
     
-    # Print formatted date
-    print(f"{message}! Today is {month} {current_time.day}, {current_time.year}")
+def display():
+    while True:
+        current_time = datetime.datetime.now()
+        hour_num = current_time.hour
+        message = get_time_message(hour_num)
+        month = MONTHS[current_time.month - 1]
+        clock_message = f"{message}! Today is {month} {current_time.day}, {current_time.year} - {current_time.strftime('%H:%M:%S')}"
+        print(f"\r{clock_message}", end = "")
+        time.sleep(1)  # Update every second
+         
 
 def get_time_message(hour_num):
     # Retrieve message using day number
@@ -116,7 +120,10 @@ def safe_input(prompt, expected_type = int):
 # Main function
 def main():
     tasks = load_tasks()
-    display()
+    
+    # Start the clock in a separate thread
+    clock_thread = threading.Thread(target = display, daemon = True)
+    clock_thread.start()
 
     while True:
         display_menu()
