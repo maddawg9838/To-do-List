@@ -37,8 +37,8 @@ def get_time_message(hour_num):
         (6, 12, MESSAGES[0]),  # Good Morning
         (12, 18, MESSAGES[1]), # Good Afternoon
         (18, 22, MESSAGES[2]), # Good Evening
-        (22, 24, MESSAGES[3],  # Late Night
-        (0, 3, MESSAGES[3]))   # Late Night
+        (22, 24, MESSAGES[3]),  # Late Night
+        (0, 3, MESSAGES[3])   # Late Night
         ]
     
     for start, end, message in time_ranges:
@@ -58,7 +58,7 @@ def load_tasks(filename='tasks.json'):
 # Save the tasks to a file
 def save_tasks(tasks, filename='tasks.json'):
     with open(filename, 'w') as file:
-        json.dump([task._dict_ for task in tasks], file)
+        json.dump([task.__dict__ for task in tasks], file)
 
 
 # Display the menu
@@ -82,8 +82,8 @@ def view_tasks(tasks):
     if not tasks:
         print("No tasks currently")
     else:
-        for index, task in enumerate(tasks, start=1):
-            status = "Completed" if task.completed else "Pending"
+        for index, task in enumerate(tasks, start = 1):
+            status = "Completed" if task.complete else "Pending"
             print(f"{index}. {task.task} - {status}")
 
 
@@ -91,8 +91,8 @@ def view_tasks(tasks):
 def mark_task_completed(tasks):
     view_tasks(tasks)
     task_num = safe_input("Enter the number of the task to mark as completed: ")
-    if 0 < task_num <= len(taks):
-        tasks[task_num - 1].completed = True
+    if 0 < task_num <= len(tasks):
+        tasks[task_num - 1].complete = True
     else:
         print("Invalid task number")
 
