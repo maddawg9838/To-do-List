@@ -1,6 +1,7 @@
 import json
 import datetime
 from dataclasses import dataclass
+from typing import Optional
 
 # Using a list for month name assignment
 MONTHS = [
@@ -21,6 +22,7 @@ class Task:
     task: str
     complete: bool = False
     working: bool = False
+    completed_at: Optional[datetime.datetime] = None
 
 
 # Display of time and day
@@ -33,6 +35,11 @@ def display():
     # Print formatted date
     print(f"{message}! Today is {month} {current_time.day}, {current_time.year}")
 
+
+def display_insights(tasks):
+    completion_rate = calculate_completion_rate(tasks)
+    print(f"\nOverall Task Completion Rate: {completion_rate:.2f}%")
+    analyze_completion_patterns(tasks)
 
 def get_time_message(hour_num):
     # Retrieve message using day number
@@ -74,7 +81,17 @@ def display_menu():
     print("3. Mark current task (being worked on)")
     print("4. Mark task as complete")
     print("5. Remove task")
-    print("6. Exit")
+    print("6. View insights")
+    print("7. Exit")
+
+
+# Calculate Completion rate
+def calculate_completion_rate(tasks):
+    total_tasks = len(tasks)
+    if total_tasks == 0:
+        return 0
+    completed_tasks = sum(1 for task in tasks if task.complete)
+    return completed_tasks / total_tasks * 100
 
 
 # Add task
@@ -100,6 +117,7 @@ def mark_task_completed(tasks):
     task_num = safe_input("Enter the number of the task to mark as completed: ")
     if 0 < task_num <= len(tasks):
         tasks[task_num - 1].complete = True
+        tasks[task_num - 1].completed_at = datetime.datetime.now()
         print(f"Task '{tasks[task_num - 1].task}' is now marked as completed")
     else:
         print("Invalid task number")
@@ -127,6 +145,18 @@ def remove_task(tasks):
         tasks.pop(task_num - 1)
     else:
         print("Invalid task number")
+
+
+def analyze_completion_patterns(tasks):
+    time_bins = {hour: 0 for hour in range(24)}
+    for task in tasks:
+        if task.completed_at:
+            hour_completed = task.completed_at.hour
+            time_bins[hour_completed] += 1
+
+    print("\nTask Completion Patterns by Hour:")
+    for hour, count in time_bins.items():
+        print(f"{hour}:00 - {count} completed tasks")
 
 
 def safe_input(prompt, expected_type=int):
@@ -157,6 +187,8 @@ def main():
         elif choice == '5':
             remove_task(tasks)
         elif choice == '6':
+            display_insights(tasks)
+        elif choice == '7':
             save_tasks(tasks)
             print("Tasks saved! Exiting...")
             break
@@ -166,3 +198,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
